@@ -1,0 +1,6 @@
+[package]
+name = "patron"
+version = "0.1.0"
+authors = ["Nathan Sculli <scull7@gmail.com>"]
+
+[dependencies]
