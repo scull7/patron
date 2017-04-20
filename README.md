@@ -38,4 +38,5 @@ use patron;
 let client: patron::Client = try!(patron::from_set(patron::HTTPS, "localhost", 5984)
             .add_path("somedatabase")
             .basic_auth("anna", "secret")
+            .build());
 ```
