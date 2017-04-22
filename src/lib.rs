@@ -1,6 +1,25 @@
+extern crate hyper;
+extern crate hyper_rustls;
+extern crate serde;
+extern crate serde_json;
+
+#[cfg(test)]
+#[macro_use]
+extern crate serde_derive;
+
+
+
+mod error;
+mod builder;
+mod client;
+mod request;
+mod url;
+pub mod types;
+
+
+
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn it_works() {
-    }
+  #[test]
+  fn it_works() {}
 }
