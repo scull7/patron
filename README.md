@@ -74,11 +74,15 @@ let url: patron::Url = try!(
   .set_scheme(patron::Scheme::Http)
   .set_host('localhost')
   .set_port(8529)
+  .build()
 );
 
 let auth: AuthRes = try!(
   patron::Request::new(url)
   .post("/_open/auth")
+  .add_body_param("username", "root")
+  .add_body_param("password", "password")
+  .send()
 );
 
 let mydb_client: patron::Client = try!(
