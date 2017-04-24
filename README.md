@@ -3,6 +3,23 @@ A wrapper around the hyper.rs library to allow for targeted clients to
 specific remote APIs. This library should be useful on it's own or as a
 building block for specific remote API wrappers.
 
+## Design
+I think that the design should move towards the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)  
+
+## Notes
+* Should the client be passed into the send method?
+* I would like to only have one representation of a request configuration instead of the current 2.
+* A more functional style design?
+* I like how the fetch API returns a response object with the ability to retrieve the `Body` in 
+  different formats. How can this be presented along with a nice `Result` based interface?
+  ```rust
+  client.get('/foo')
+    .send()
+    .json()
+  ```
+  `send()` will return a `Response` object which you can call `.json()`.  The `.json()` method will return
+  a `Result<serde_json::Value, Error>`
+
 ## The Interface
 
 ### Exports
