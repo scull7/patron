@@ -1,2 +1,4 @@
 
-mod builder;
+pub use self::url::Url;
+
+mod url;

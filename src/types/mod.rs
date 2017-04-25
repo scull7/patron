@@ -12,7 +12,7 @@ mod scheme;
 pub type Client = std::sync::Arc<hyper::client::Client>;
 
 
-pub type QueryParams<'a> = std::collections::HashMap<&'a str,
+pub type QueryParams<'a> = std::collections::HashMap<String,
                                                      std::borrow::Cow<'a, str>>;
 
 

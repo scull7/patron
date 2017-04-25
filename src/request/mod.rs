@@ -1,4 +1,4 @@
 
-pub use self::builder::Builder;
+pub use self::request::Request;
 
-mod builder;
+mod request;

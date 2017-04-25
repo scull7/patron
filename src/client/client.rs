@@ -1,7 +1,11 @@
 
+use error;
 use request;
 use std;
 use types;
+
+
+type Result<'a> = std::result::Result<request::Request<'a>, error::Error>;
 
 
 pub trait Client<'a> {
@@ -11,28 +15,27 @@ pub trait Client<'a> {
   fn get_base_url(&self) -> std::borrow::Cow<'a, str>;
 
 
-  fn request<S>(&self, method: types::Method, path: S) -> request::Builder
-    where S: Into<std::borrow::Cow<'a, str>>
+  fn request<S>(&self, method: types::Method, path: S) -> Result<'a>
+    where S: Into<String>
   {
     let base_url: String = self.get_base_url().into();
-    let path: String = path.into().into_owned();
-    let mut req = request::Builder::new(self.get_client().clone(), method);
+    let mut req = try!(request::Request::from_url(base_url));
 
-    req.set_base_url(base_url).add_path(path);
+    req.set_method(method).add_path(path.into());
 
-    req
+    Ok(req)
   }
 
 
-  fn post<S>(&self, path: S) -> request::Builder
-    where S: Into<std::borrow::Cow<'a, str>>
+  fn post<S>(&self, path: S) -> Result<'a>
+    where S: Into<String>
   {
     self.request(types::Method::Post, path)
   }
 
 
-  fn get<S>(&self, path: S) -> request::Builder
-    where S: Into<std::borrow::Cow<'a, str>>
+  fn get<S>(&self, path: S) -> Result<'a>
+    where S: Into<String>
   {
     self.request(types::Method::Get, path)
   }

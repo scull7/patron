@@ -36,10 +36,11 @@ impl<'a> Builder<'a> {
   }
 
 
-  pub fn add_query_param<S>(&mut self, key: &'a str, val: S) -> &mut Builder<'a>
-    where S: Into<std::borrow::Cow<'a, str>>
+  pub fn add_query_param<K, S>(&mut self, key: K, val: S) -> &mut Builder<'a>
+    where K: Into<String>,
+          S: Into<std::borrow::Cow<'a, str>>
   {
-    self.query_params.insert(key, val.into());
+    self.query_params.insert(key.into(), val.into());
     self
   }
 
