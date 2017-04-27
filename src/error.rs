@@ -1,5 +1,6 @@
 
 use hyper;
+use response;
 use serde_json;
 use std;
 
@@ -11,10 +12,7 @@ pub enum Error {
   InvalidUrl(UrlError),
   InvalidMethod(String),
   InvalidScheme(String),
-
-  // @TODO expand this into a complete set of errors
-  // so that, users can easily act up different errors appropriately.
-  CallFailure(u16, String),
+  CallFailure(response::Response),
 }
 
 
@@ -56,5 +54,12 @@ impl std::convert::From<serde_json::Error> for Error {
 impl std::convert::From<UrlError> for Error {
   fn from(err: UrlError) -> Error {
     Error::InvalidUrl(err)
+  }
+}
+
+
+impl std::convert::From<response::Response> for Error {
+  fn from(err: response::Response) -> Error {
+    Error::CallFailure(err)
   }
 }

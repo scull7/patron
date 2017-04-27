@@ -14,6 +14,7 @@ mod builder;
 pub mod client;
 pub mod error;
 mod request;
+mod response;
 mod types;
 pub mod url;
 

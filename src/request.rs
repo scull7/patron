@@ -1,6 +1,8 @@
 
+use error;
 use hyper;
 use hyper_rustls;
+use response;
 use std;
 use types;
 use url;
@@ -12,7 +14,7 @@ pub struct Request<'a> {
   method: types::Method,
   url: url::Url<'a>,
   headers: hyper::header::Headers,
-  body: Option<String>,
+  body: String,
 }
 
 
@@ -23,7 +25,7 @@ impl<'a> Request<'a> {
       method: types::Method::Get,
       url: url::Url::new(),
       headers: hyper::header::Headers::new(),
-      body: None,
+      body: String::new(),
     }
   }
 
@@ -68,7 +70,7 @@ impl<'a> Request<'a> {
   pub fn set_body<S>(&mut self, body: S) -> &mut Request<'a>
     where S: Into<String>
   {
-    self.body = Some(body.into());
+    self.body = body.into();
     self
   }
 
@@ -116,5 +118,29 @@ impl<'a> Request<'a> {
     let auth = hyper::header::Bearer { token: token.into() };
 
     self.add_header(hyper::header::Authorization(auth))
+  }
+
+
+  pub fn send(&self) -> std::result::Result<response::Response, error::Error> {
+
+    let url = try!(self.url.to_url());
+
+    let request = match self.method {
+        types::Method::Get => self.client.get(url),
+        types::Method::Post => self.client.post(url),
+        types::Method::Put => self.client.put(url),
+    };
+
+    request
+        .headers(self.headers.clone())
+        .body(&self.body)
+        .send()
+        .map_err(error::Error::from)
+        .map(response::Response::from)
+        .and_then(|res| match res.ok {
+            true => Ok(res),
+            false => Err(error::Error::from(res)),
+        })
+
   }
 }
