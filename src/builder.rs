@@ -1,26 +1,38 @@
 
+use client;
+use error;
 use hyper;
+use request;
 use std;
+use types;
+use url;
+
+
+use std::str::FromStr;
+
+
+pub enum UrlType<'a> {
+  UrlString(std::borrow::Cow<'a, str>),
+  UrlObject(url::Url<'a>),
+}
 
 
 pub struct Builder<'a> {
-  base_url: std::borrow::Cow<'a, str>,
+  base_url: UrlType<'a>,
   headers: hyper::header::Headers,
-  query_params: super::types::QueryParams<'a>,
-  path_segments: Vec<std::borrow::Cow<'a, str>>,
+  query_params: types::QueryParams<'a>,
+  path_segments: types::PathSegments<'a>,
 }
 
 
 impl<'a> Builder<'a> {
-  pub fn new<S>(url: S) -> Builder<'a>
-    where S: Into<std::borrow::Cow<'a, str>>
-  {
+  pub fn new(url: UrlType<'a>) -> Builder<'a> {
 
     let mut headers = hyper::header::Headers::new();
     headers.set(hyper::header::ContentType::json());
 
     Self {
-      base_url: url.into(),
+      base_url: url,
       headers: headers,
       query_params: std::collections::HashMap::new(),
       path_segments: std::vec::Vec::new(),
@@ -75,5 +87,21 @@ impl<'a> Builder<'a> {
     let auth = hyper::header::Bearer { token: token.into().into_owned() };
 
     self.add_header(hyper::header::Authorization(auth))
+  }
+
+
+  pub fn build(self) -> std::result::Result<client::Client<'a>, error::Error> {
+
+    let mut url = match self.base_url {
+      UrlType::UrlString(ref url) => try!(url::Url::from_str(url)),
+      UrlType::UrlObject(url) => url,
+    };
+    url.add_query_params(&self.query_params);
+    url.add_path_segments(&self.path_segments);
+
+    let mut req = request::Request::new();
+    req.set_url(url).set_headers(self.headers);
+
+    Ok(client::Client::new(req))
   }
 }

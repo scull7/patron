@@ -6,6 +6,7 @@ use std;
 use std::str::FromStr;
 
 
+#[derive(Debug, Clone)]
 pub enum Scheme {
   Https,
   Http,

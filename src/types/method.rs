@@ -3,6 +3,7 @@ use error;
 use std;
 
 
+#[derive(Debug, Clone)]
 pub enum Method {
   Get,
   Post,

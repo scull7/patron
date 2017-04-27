@@ -10,17 +10,24 @@ extern crate serde_derive;
 
 
 
-mod error;
 mod builder;
-mod client;
+pub mod client;
+pub mod error;
 mod request;
-mod url;
-pub mod types;
+mod types;
+pub mod url;
 
 
+pub fn from_str<'a, S>(url: S) -> builder::Builder<'a>
+  where S: Into<std::borrow::Cow<'a, str>>
+{
 
-#[cfg(test)]
-mod tests {
-  #[test]
-  fn it_works() {}
+  let url = builder::UrlType::UrlString(url.into());
+  builder::Builder::new(url)
+}
+
+
+pub fn from_url<'a>(url: url::Url<'a>) -> builder::Builder<'a> {
+  let url = builder::UrlType::UrlObject(url);
+  builder::Builder::new(url)
 }

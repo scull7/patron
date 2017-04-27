@@ -1,12 +1,14 @@
 
 use error;
 use hyper;
+use lib_url;
 use std;
 use types;
 
 
+#[derive(Debug, Clone)]
 pub struct Url<'a> {
-  scheme: types::Scheme,
+  pub scheme: types::Scheme,
   host: std::borrow::Cow<'a, str>,
   port: u16,
   path_segments: types::PathSegments<'a>,
@@ -26,16 +28,8 @@ impl<'a> Url<'a> {
   }
 
 
-  pub fn to_url(&self) -> hyper::Url {
-    let mut url = hyper::Url::parse("http://localhost").unwrap();
-    url.set_scheme(&self.scheme.to_string());
-    url.set_host(Some(&*self.host));
-    url.set_port(Some(self.port));
-
-    append_segments(&mut url, &self.path_segments);
-    append_query_pairs(&mut url, &self.query_params);
-
-    url
+  pub fn to_url(&self) -> std::result::Result<hyper::Url, error::Error> {
+    hyper::Url::parse(&self.to_string()).map_err(error::Error::from)
   }
 
 
@@ -60,6 +54,24 @@ impl<'a> Url<'a> {
     where S: Into<std::borrow::Cow<'a, str>>
   {
     self.path_segments.push(path.into());
+  }
+
+
+  pub fn add_path_segments(&mut self, segments: &types::PathSegments) {
+    for segment in segments {
+      let path = std::borrow::Cow::from(segment.clone().into_owned());
+      self.path_segments.push(path);
+    }
+  }
+
+
+  pub fn add_query_params(&mut self, params: &types::QueryParams) {
+
+    for (key, value) in params {
+      let value = std::borrow::Cow::from(value.clone().into_owned());
+      self.query_params.insert(key.clone(), value);
+    }
+
   }
 
 
@@ -93,30 +105,34 @@ impl<'a> std::str::FromStr for Url<'a> {
 
 impl<'a> std::fmt::Display for Url<'a> {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    f.write_str(self.to_url().as_str())
+
+    write!(f,
+           "{scheme}{host}:{port}/{paths}?{query}",
+           scheme = &self.scheme.to_string(),
+           host = &*self.host,
+           port = self.port,
+           paths = join_paths(&self.path_segments),
+           query = encode_query(&self.query_params))
   }
 }
 
 
-fn append_segments(url: &mut hyper::Url, segments: &types::PathSegments) {
-
-  let mut url_segments =
-    url.path_segments_mut().expect("unexpected invalid URL.");
-
-  for segment in segments {
-    url_segments.push(&*segment);
-  }
-}
-
-
-fn append_query_pairs(url: &mut hyper::Url, params: &types::QueryParams) {
-
-  let mut url_params = url.query_pairs_mut();
+fn encode_query(params: &types::QueryParams) -> String {
+  let mut serializer = lib_url::form_urlencoded::Serializer::new(String::new());
 
   for (key, value) in params {
-    url_params.append_pair(key.as_ref(), &*value);
+    serializer.append_pair(&key, &*value);
   }
 
+  serializer.finish()
+}
+
+
+fn join_paths(segments: &types::PathSegments) -> String {
+  let s = String::new();
+  segments
+    .iter()
+    .fold(s, |i, j| i.to_string() + "/" + &j.clone().into_owned())
 }
 
 
