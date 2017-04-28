@@ -90,17 +90,17 @@ impl<'a> Builder<'a> {
   }
 
 
-  pub fn build(self) -> std::result::Result<client::Client<'a>, error::Error> {
+  pub fn build(&self) -> std::result::Result<client::Client<'a>, error::Error> {
 
     let mut url = match self.base_url {
       UrlType::UrlString(ref url) => try!(url::Url::from_str(url)),
-      UrlType::UrlObject(url) => url,
+      UrlType::UrlObject(ref url) => url.clone(),
     };
     url.add_query_params(&self.query_params);
     url.add_path_segments(&self.path_segments);
 
     let mut req = request::Request::new();
-    req.set_url(url).set_headers(self.headers);
+    req.set_url(url).set_headers(self.headers.clone());
 
     Ok(client::Client::new(req))
   }

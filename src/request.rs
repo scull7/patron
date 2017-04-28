@@ -1,4 +1,3 @@
-
 use error;
 use hyper;
 use hyper_rustls;
@@ -59,9 +58,10 @@ impl<'a> Request<'a> {
   }
 
 
-  pub fn set_headers(&mut self,
-                     headers: hyper::header::Headers)
-                     -> &mut Request<'a> {
+  pub fn set_headers(
+    &mut self,
+    headers: hyper::header::Headers,
+  ) -> &mut Request<'a> {
     self.headers = headers;
     self
   }
@@ -92,11 +92,12 @@ impl<'a> Request<'a> {
   }
 
 
-  pub fn add_query_param<K, S>(&mut self, key: K, val: S)
+  pub fn add_query_param<K, S>(&mut self, key: K, val: S) -> &mut Request<'a>
     where K: Into<String>,
           S: Into<std::borrow::Cow<'a, str>>
   {
     self.url.add_query_param(key, val);
+    self
   }
 
 
@@ -126,21 +127,23 @@ impl<'a> Request<'a> {
     let url = try!(self.url.to_url());
 
     let request = match self.method {
-        types::Method::Get => self.client.get(url),
-        types::Method::Post => self.client.post(url),
-        types::Method::Put => self.client.put(url),
+      types::Method::Get => self.client.get(url),
+      types::Method::Post => self.client.post(url),
+      types::Method::Put => self.client.put(url),
     };
 
     request
-        .headers(self.headers.clone())
-        .body(&self.body)
-        .send()
-        .map_err(error::Error::from)
-        .map(response::Response::from)
-        .and_then(|res| match res.ok {
-            true => Ok(res),
-            false => Err(error::Error::from(res)),
-        })
+      .headers(self.headers.clone())
+      .body(&self.body)
+      .send()
+      .map_err(error::Error::from)
+      .map(response::Response::from)
+      .and_then(
+        |res| match res.ok {
+          true => Ok(res),
+          false => Err(error::Error::from(res)),
+        },
+      )
 
   }
 }

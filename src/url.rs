@@ -1,4 +1,3 @@
-
 use error;
 use hyper;
 use lib_url;
@@ -10,7 +9,7 @@ use types;
 pub struct Url<'a> {
   pub scheme: types::Scheme,
   host: std::borrow::Cow<'a, str>,
-  port: u16,
+  port: Option<u16>,
   path_segments: types::PathSegments<'a>,
   query_params: types::QueryParams<'a>,
 }
@@ -21,7 +20,7 @@ impl<'a> Url<'a> {
     Url {
       scheme: types::Scheme::Http,
       host: std::borrow::Cow::from("localhost"),
-      port: 80,
+      port: None,
       path_segments: std::vec::Vec::new(),
       query_params: std::collections::HashMap::new(),
     }
@@ -29,7 +28,9 @@ impl<'a> Url<'a> {
 
 
   pub fn to_url(&self) -> std::result::Result<hyper::Url, error::Error> {
-    hyper::Url::parse(&self.to_string()).map_err(error::Error::from)
+    let url = &self.to_string();
+
+    hyper::Url::parse(url).map_err(error::Error::from)
   }
 
 
@@ -46,14 +47,22 @@ impl<'a> Url<'a> {
 
 
   pub fn set_port(&mut self, port: u16) {
-    self.port = port;
+    self.port = Some(port);
   }
 
 
   pub fn add_path<S>(&mut self, path: S)
-    where S: Into<std::borrow::Cow<'a, str>>
+    where S: Into<String>
   {
-    self.path_segments.push(path.into());
+    let path_str = path.into();
+    let new_segments = path_str
+      .split("/")
+      .filter(|s| s.len() > 0)
+      .map(|s| s.to_string());
+
+    for segment in new_segments {
+      self.path_segments.push(std::borrow::Cow::from(segment));
+    }
   }
 
 
@@ -91,13 +100,15 @@ impl<'a> std::str::FromStr for Url<'a> {
   fn from_str(s: &str) -> std::result::Result<self::Url<'a>, Self::Err> {
     let url = try!(hyper::Url::parse(s));
 
-    Ok(Url {
-         scheme: try!(types::Scheme::from_str(url.scheme())),
-         host: host_from_url(&url),
-         port: url.port().unwrap_or(80),
-         path_segments: path_segments_from_url(&url),
-         query_params: query_params_from_url(&url),
-       })
+    Ok(
+      Url {
+        scheme: try!(types::Scheme::from_str(url.scheme())),
+        host: host_from_url(&url),
+        port: url.port(),
+        path_segments: path_segments_from_url(&url),
+        query_params: query_params_from_url(&url),
+      },
+    )
 
   }
 }
@@ -105,14 +116,15 @@ impl<'a> std::str::FromStr for Url<'a> {
 
 impl<'a> std::fmt::Display for Url<'a> {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    let scheme = &self.scheme.to_string();
+    let host = &*self.host;
+    let paths = join_paths(&self.path_segments);
+    let query = encode_query(&self.query_params);
 
-    write!(f,
-           "{scheme}{host}:{port}/{paths}?{query}",
-           scheme = &self.scheme.to_string(),
-           host = &*self.host,
-           port = self.port,
-           paths = join_paths(&self.path_segments),
-           query = encode_query(&self.query_params))
+    match self.port {
+      None => write!(f, "{}{}{}?{}", scheme, host, paths, query),
+      Some(port) => write!(f, "{}{}:{}{}?{}", scheme, host, port, paths, query),
+    }
   }
 }
 
@@ -132,6 +144,7 @@ fn join_paths(segments: &types::PathSegments) -> String {
   let s = String::new();
   segments
     .iter()
+    .filter(|s| s.len() > 0)
     .fold(s, |i, j| i.to_string() + "/" + &j.clone().into_owned())
 }
 

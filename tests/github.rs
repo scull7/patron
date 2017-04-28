@@ -1,17 +1,27 @@
+extern crate hyper;
+extern crate patron;
 
-use patron;
-
-let client_id: &'static str = "39515280290e3b9c67eb"
-let client_secret: &'static str = "53742fb491d5c17170c60c3330553f226c0fc469"
+static CLIENT_ID: &'static str = "39515280290e3b9c67eb";
+static CLIENT_SECRET: &'static str = "53742fb491d5c17170c60c3330553f226c0fc469";
 
 
 #[test]
+#[ignore]
 fn get_commits() {
 
-  let client: patron::Client = patron::from_url("https://api.github.com")
-    .add_query_param("client_id", client_id)
-    .add_query_param("client_secret", client_secret)
+  let client: patron::Client = patron::from_str("https://api.github.com")
+    .add_header(hyper::header::UserAgent("patron".to_string()))
+    .add_query_param("client_id", CLIENT_ID)
+    .add_query_param("client_secret", CLIENT_SECRET)
     .build()
     .unwrap();
+
+
+  let commits = client.get("/repos/scull7/patron/commits")
+    //.add_query_param("until", "2017-04-27T23:20:00Z")
+    .send()
+    .expect("Failed to retrieve commits");
+
+  println!("Commits: {:?}", commits);
 
 }

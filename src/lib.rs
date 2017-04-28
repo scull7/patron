@@ -8,6 +8,7 @@ extern crate url as lib_url;
 #[macro_use]
 extern crate serde_derive;
 
+pub use client::Client;
 
 
 mod builder;
