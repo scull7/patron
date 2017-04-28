@@ -1,8 +1,8 @@
 
 #[derive(Debug, Clone)]
 pub enum Types {
-  //Normal, same origin response, with all headers exposed except
-  //`Set-Cookie` and `Set-Cookie2`.
+  // Normal, same origin response, with all headers exposed except
+  // Set-Cookie` and `Set-Cookie2`.
   Basic,
 
   // Response was received from a valid cross-origin request.  Certain

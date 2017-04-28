@@ -1,9 +1,9 @@
-
+use super::types;
 use error;
 use hyper;
+use serde;
 use serde_json;
 use std;
-use super::types;
 
 
 #[derive(Debug)]
@@ -20,8 +20,13 @@ pub struct Response {
 
 
 impl Response {
-
   pub fn json(self) -> std::result::Result<serde_json::Value, error::Error> {
+    serde_json::from_reader(self.res).map_err(error::Error::from)
+  }
+
+  pub fn deserialize<T>(self) -> std::result::Result<T, error::Error>
+    where T: serde::de::DeserializeOwned
+  {
     serde_json::from_reader(self.res).map_err(error::Error::from)
   }
 }
@@ -29,7 +34,6 @@ impl Response {
 
 
 impl std::convert::From<hyper::client::response::Response> for Response {
-
   fn from(res: hyper::client::response::Response) -> Response {
     let hyper::http::RawStatus(status, status_text) = res.status_raw().clone();
 
@@ -41,7 +45,7 @@ impl std::convert::From<hyper::client::response::Response> for Response {
       status_text: status_text.into_owned(),
       kind: types::Types::Basic,
       url: res.url.to_string(),
-      res:res,
+      res: res,
     }
   }
 }

@@ -1,4 +1,3 @@
-
 use error;
 use std;
 
@@ -19,14 +18,14 @@ impl std::str::FromStr for Method {
 
 
   fn from_str(s: &str) -> std::result::Result<self::Method, Self::Err> {
-    Ok(match s.to_uppercase().as_str() {
-         "GET" => self::Method::Get,
-         "POST" => self::Method::Post,
-         "PUT" => self::Method::Put,
-         invalid => {
-           return Err(error::Error::InvalidMethod(invalid.to_string()))
-         }
-       })
+    Ok(
+      match s.to_uppercase().as_str() {
+        "GET" => self::Method::Get,
+        "POST" => self::Method::Post,
+        "PUT" => self::Method::Put,
+        invalid => return Err(error::Error::InvalidMethod(invalid.to_string())),
+      },
+    )
 
   }
 }
@@ -34,10 +33,12 @@ impl std::str::FromStr for Method {
 
 impl std::fmt::Display for Method {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    f.write_str(match *self {
-                  self::Method::Get => "GET",
-                  self::Method::Post => "POST",
-                  self::Method::Put => "PUT",
-                })
+    f.write_str(
+      match *self {
+        self::Method::Get => "GET",
+        self::Method::Post => "POST",
+        self::Method::Put => "PUT",
+      },
+    )
   }
 }

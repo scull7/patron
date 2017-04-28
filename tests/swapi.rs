@@ -21,9 +21,13 @@ fn https_get_test() {
   let client = patron::from_str("https://swapi.co/api/")
     .build()
     .unwrap();
+
   // Should get "Han Solo"
-  let response = client.get("/people/14").send().unwrap();
-  let han_solo: Person = serde_json::from_value(response.json().unwrap())
+  let han_solo: Person = client
+    .get("/people/14")
+    .send()
+    .expect("Could not retrieve Han Solo")
+    .deserialize()
     .unwrap();
 
   assert_eq!(han_solo.birth_year, "29BBY");

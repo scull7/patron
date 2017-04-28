@@ -1,14 +1,13 @@
-
 use client;
 use error;
 use hyper;
 use request;
 use std;
-use types;
-use url;
 
 
 use std::str::FromStr;
+use types;
+use url;
 
 
 pub enum UrlType<'a> {
@@ -65,10 +64,11 @@ impl<'a> Builder<'a> {
   }
 
 
-  pub fn basic_auth<U, P>(&mut self,
-                          user: U,
-                          pass: Option<P>)
-                          -> &mut Builder<'a>
+  pub fn basic_auth<U, P>(
+    &mut self,
+    user: U,
+    pass: Option<P>,
+  ) -> &mut Builder<'a>
     where U: Into<std::borrow::Cow<'a, str>>,
           P: Into<std::borrow::Cow<'a, str>>
   {

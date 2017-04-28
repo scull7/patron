@@ -3,6 +3,19 @@ name = "patron"
 version = "0.1.0"
 authors = ["Nathan Sculli <scull7@gmail.com>"]
 
+description = """A wrapper around the hyper.rs library to allow for targeted \
+clients to specific remote APIs. This library should be useful on it's own or \
+as a building block for specific remote API wrappers."""
+
+homepage = "https://github.com/scull7/patron"
+repository = "https://github.com/scull7/patron"
+
+readme = "./README.md"
+
+keywords = ["http", "client", "fetch", "web", "https", "api"]
+categories = ["web-programming::http-client","api-bindings"]
+license = "MIT"
+
 [dependencies]
 hyper = "0.10"
 hyper-rustls = "0.3"

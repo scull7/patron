@@ -42,17 +42,13 @@ fn get_commits() {
     .unwrap();
 
 
-  let commits: Vec<Commit> =
-    serde_json::from_value(
-      client
-        .get("/repos/scull7/patron/commits")
-        .add_query_param("until", "2017-04-27T23:20:00Z")
-        .send()
-        .expect("Failed to retrieve commits")
-        .json()
-        .unwrap(),
-    )
-        .unwrap();
+  let commits: Vec<Commit> = client
+    .get("/repos/scull7/patron/commits")
+    .add_query_param("until", "2017-04-27T23:20:00Z")
+    .send()
+    .expect("Failed to retrieve commits")
+    .deserialize()
+    .unwrap();
 
 
   println!("Commits: {:?}", commits);

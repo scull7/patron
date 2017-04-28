@@ -3,23 +3,6 @@ A wrapper around the hyper.rs library to allow for targeted clients to
 specific remote APIs. This library should be useful on it's own or as a
 building block for specific remote API wrappers.
 
-## Design
-I think that the design should move towards the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)  
-
-## Notes
-* Should the client be passed into the send method?
-* I would like to only have one representation of a request configuration instead of the current 2.
-* A more functional style design?
-* I like how the fetch API returns a response object with the ability to retrieve the `Body` in 
-  different formats. How can this be presented along with a nice `Result` based interface?
-  ```rust
-  client.get('/foo')
-    .send()
-    .json()
-  ```
-  `send()` will return a `Response` object which you can call `.json()`.  The `.json()` method will return
-  a `Result<serde_json::Value, Error>`
-
 ## The Interface
 
 ### Exports
@@ -31,12 +14,33 @@ pub type Client = std::sync::Arc<patron::Client>;
 
 ```
 
+### Create an HTTP Star Wars API client.
+```rust
+struct Person {
+  name: String,
+  birth_year: String,
+  eye_color: String,
+  height: String,
+  mass: String,
+}
+
+let client = try!(patron::from_str("http://swapi.co/api")
+  .build()
+);
+
+let han_solo: Person = try!client.get("/people/14")
+  .send()
+  .and_then(|res| res.deserialize())
+);
+```
+
+
 ### Creating an HTTPs GitHub Api client with an OAuth2 token.
 ```rust
 use patron;
 
 let client: patron::Client = try!(
-  patron::from_url("https://api.github.com")
+  patron::from_str("https://api.github.com")
   .set_oauth_token("0b79bab50daca910b000d4f1a2b675d604257e42")
   .build()
 );
@@ -47,7 +51,7 @@ let client: patron::Client = try!(
 use patron;
 
 let client: patron::Client = try!(
-  patron::from_url("https://api.github.com")
+  patron::from_str("https://api.github.com")
   .add_query_param("client_id", "ABCDEFGHIKLMNOP")
   .add_query_param("client_secret", "QRSTUVWXYZABCDE")
   .build()
@@ -75,6 +79,7 @@ let client: patron::Client = try!(
 ```
 
 ### Example usage for ArangoDB
+***THIS IS NOT FULLY IMPLEMENTED, LIES ABOUND!***
 ```rust
 use serde_json;
 use patron;
@@ -86,13 +91,10 @@ struct AuthRes {
 }
 
 // Generally this would be built from some configuration object.
-let url: patron::Url = try!(
-  patron::Url::new()
-  .set_scheme(patron::Scheme::Http)
-  .set_host('localhost')
-  .set_port(8529)
-  .build()
-);
+let mut url = patron::url::Url::new()
+url.set_scheme(patron::Scheme::Http)
+url.set_host("localhost")
+url.set_port(8529)
 
 let auth: AuthRes = try!(
   patron::Request::new(url)
@@ -172,3 +174,23 @@ let res: UpdateRes = try!(
   .send()
 );
 ```
+
+### Design
+Response Objects: [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)  
+
+### Notes
+* Should the client be passed into the send method?
+* I would like to only have one representation of a request configuration instead of the current 2.
+* A more functional style design?
+* I like how the fetch API returns a response object with the ability to retrieve the `Body` in 
+  different formats. How can this be presented along with a nice `Result` based interface?
+  ```rust
+  client.get('/foo')
+    .send()
+    .unwrap()
+    .json()
+  ```
+  `send()` will return a `Response` object which you can call `.json()`.  The `.json()` method will return
+  a `Result<serde_json::Value, Error>`
+
+
