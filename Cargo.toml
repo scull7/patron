@@ -12,7 +12,7 @@ repository = "https://github.com/scull7/patron"
 
 readme = "./README.md"
 
-keywords = ["http", "client", "fetch", "web", "https", "api"]
+keywords = ["http", "client", "fetch", "https", "api"]
 categories = ["web-programming::http-client","api-bindings"]
 license = "MIT"
 
