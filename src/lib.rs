@@ -8,15 +8,15 @@ extern crate url as lib_url;
 #[macro_use]
 extern crate serde_derive;
 
-pub use client::Client;
-
-
 mod builder;
-pub mod client;
-pub mod error;
+mod client;
 mod request;
 mod response;
 mod types;
+
+
+pub type Client<'a> = std::sync::Arc<client::Client<'a>>;
+pub mod error;
 pub mod url;
 
 

@@ -1,6 +1,6 @@
 [package]
 name = "patron"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Nathan Sculli <scull7@gmail.com>"]
 
 description = """A wrapper around the hyper.rs library to allow for targeted \

@@ -90,7 +90,7 @@ impl<'a> Builder<'a> {
   }
 
 
-  pub fn build(&self) -> std::result::Result<client::Client<'a>, error::Error> {
+  pub fn build(&self) -> std::result::Result<super::Client<'a>, error::Error> {
 
     let mut url = match self.base_url {
       UrlType::UrlString(ref url) => try!(url::Url::from_str(url)),
@@ -102,6 +102,8 @@ impl<'a> Builder<'a> {
     let mut req = request::Request::new();
     req.set_url(url).set_headers(self.headers.clone());
 
-    Ok(client::Client::new(req))
+    let client = std::sync::Arc::new(client::Client::new(req));
+
+    Ok(client)
   }
 }
