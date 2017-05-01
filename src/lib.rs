@@ -19,6 +19,8 @@ pub type Client<'a> = std::sync::Arc<client::Client<'a>>;
 pub mod error;
 pub mod url;
 
+pub use response::Response;
+
 
 pub fn from_str<'a, S>(url: S) -> builder::Builder<'a>
   where S: Into<std::borrow::Cow<'a, str>>
